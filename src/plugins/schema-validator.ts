@@ -1,5 +1,6 @@
 import AjvPkg, { type ErrorObject, type ValidateFunction } from "ajv";
 import { appendAllowedValuesHint, summarizeAllowedValues } from "../config/allowed-values.js";
+import { sanitizeTerminalText } from "../terminal/safe-text.js";
 
 const ajv = new (AjvPkg as unknown as new (opts?: object) => import("ajv").default)({
   allErrors: true,
@@ -95,10 +96,12 @@ function formatAjvErrors(errors: ErrorObject[] | null | undefined): JsonSchemaVa
     const message = allowedValuesSummary
       ? appendAllowedValuesHint(baseMessage, allowedValuesSummary)
       : baseMessage;
+    const safePath = sanitizeTerminalText(path);
+    const safeMessage = sanitizeTerminalText(message);
     return {
       path,
       message,
-      text: `${path}: ${message}`,
+      text: `${safePath}: ${safeMessage}`,
       ...(allowedValuesSummary
         ? {
             allowedValues: allowedValuesSummary.values,
